@@ -1,4 +1,5 @@
-# -*- coding: utf-8 -*-
+#! /usr/bin/python3
+# coding: utf-8
 import unittest
 from selenium import webdriver
 from time import sleep
@@ -8,22 +9,26 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
-CHROME_BINARY_LOCATION = "C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe"
-WEBDRIVER_PATH = 'chromedriver.exe'
+# CHROME_BINARY_LOCATION = "C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe"
+WEBDRIVER_PATH = '/home/jhcheng/108_2_UI_Testing/venv/bin/chromedriver'
 TARGET = "http://127.0.0.1:8000"
+# TARGET = "http://christopher.su"
 
 class UiTest(unittest.TestCase):
     def setUp(self):
         options = Options()
-        options.add_argument("--window-size=1920,1080")
-        options.add_argument("--start-maximized")
         options.add_argument('--headless')
-        options.binary_location = CHROME_BINARY_LOCATION
+        options.add_argument('--disable-gpu')
+        options.add_argument('--no-sandbox')
+        # options.add_argument('--')
+        options.add_argument('--disable-dev-shm-usage')
+        # options.binary_location = CHROME_BINARY_LOCATION
         self.driver = webdriver.Chrome(executable_path=WEBDRIVER_PATH, options=options)
         self.driver.implicitly_wait(30) 
 
     def tearDown(self):
-        self.driver.quit()
+        pass
+        # self.driver.quit()
 
     def login(self):
         driver = self.driver
@@ -37,11 +42,16 @@ class UiTest(unittest.TestCase):
     def test_login(self):
         driver = self.driver
         driver.get(TARGET)
-        # element = WebDriverWait(driver, 10).until(
-        #     EC.presence_of_element_located((By.ID, "navbar-static-login"))
-        # )        
+        sleep(3)
+        element = WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.ID, "navbar-static-login"))
+        )        
+
+
+        print(driver.title)
         button_elem = driver.find_elements_by_xpath('//*[@id="navbar-static-login"]/span')[0]
-        button_elem.click()
+        # button_elem.click()
+        driver.execute_script("arguments[0].click();",button_elem)
         acco_elem = driver.find_element_by_name("account")
         pass_elem = driver.find_element_by_name("password")
         acco_elem.send_keys("!@#$")
@@ -57,7 +67,7 @@ class UiTest(unittest.TestCase):
         pass_elem.send_keys(Keys.ENTER)
         assert "登入失敗".encode('utf-8').decode('utf-8') not in driver.page_source
 
-    def test_put_in_shopping_cart(self):
+    def te1st_put_in_shopping_cart(self):
         self.login()
         driver = self.driver
         driver.get(TARGET+'/products')
@@ -66,9 +76,9 @@ class UiTest(unittest.TestCase):
         # click add to shopping cart
         driver.find_elements_by_xpath('/html/body/main/div/div/div[1]/div[2]/div/div[3]/button')[0].click()
         sleep(3)
-        assert "已加入購物車".encode('utf-8').decode('utf-8') in driver.page_source
+        assert "已加入購物車".encode('gbk').decode('gbk') in driver.page_source
     
-    def test_clear_shopping_cart(self):
+    def te1st_clear_shopping_cart(self):
         self.login()
         driver = self.driver
         driver.get(TARGET+'/products')
