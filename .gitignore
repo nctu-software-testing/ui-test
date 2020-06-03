@@ -3,3 +3,5 @@ debug.log
 env
 chromedriver.exe
 venv
+.main.py.swo
+tt.py
