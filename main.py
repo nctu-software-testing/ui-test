@@ -13,31 +13,39 @@ from selenium.webdriver.support import expected_conditions as EC
 WEBDRIVER_PATH = "chromedriver.exe"
 TARGET = "http://127.0.0.1:8000"
 # TARGET = "https://www.google.com/"
+admin_addr = "admin"
+admin_pwd = "admin"
+custo_addr = "c"
+custo_pwd = "c"
+bm_addr = "b"
+bm_pwd = "b"
 
 class UiTest(unittest.TestCase):
     def setUp(self):
         options = Options()
         options.add_argument('--start-maximized')
         options.add_argument("--window-size=1920,1080")
-        options.add_argument('--headless')
+        # options.add_argument('--headless')
         options.add_argument('--disable-gpu')
         options.add_argument('--no-sandbox')
         # options.binary_location = CHROME_BINARY_LOCATION
         self.driver = webdriver.Chrome(executable_path=WEBDRIVER_PATH, options=options)
-        self.driver.implicitly_wait(30) 
+        self.driver.implicitly_wait(30)
 
     def tearDown(self):
         self.driver.quit()
 
-    def login(self):
+    def login(self, acc=admin_addr, pwd=admin_pwd):
         driver = self.driver
         driver.get(TARGET)
-        driver.find_elements_by_xpath('//*[@id="navbar-static-login"]/span')[0].click()
-        driver.find_element_by_name("account").send_keys("admin")
-        driver.find_element_by_name("password").send_keys("admin")
+        
+        driver.execute_script("arguments[0].click();", driver.find_elements_by_xpath('//*[@id="navbar-static-login"]/span')[0])
+        driver.find_element_by_name("account").send_keys(acc)
+        driver.find_element_by_name("password").send_keys(pwd)
         driver.find_element_by_name("password").send_keys(Keys.ENTER)
         sleep(3)
 
+    # TC 01- Verify that the login state is correct.
     def test_login(self):
         driver = self.driver
         driver.get(TARGET)
@@ -63,8 +71,14 @@ class UiTest(unittest.TestCase):
         pass_elem.send_keys(Keys.ENTER)
         assert "登入失敗".encode('utf-8').decode('utf-8') not in driver.page_source
 
+        sleep(3)
+        driver.execute_script("arguments[0].click();", driver.find_elements_by_xpath('//*[@id="navbarSupportedContent"]/div[2]/div/div[2]/div/button')[0])
+        button_text = driver.find_element_by_xpath('//*[@id="navbar-static-login"]/span').text
+        self.assertEqual(button_text, "登入")
+
+    # TC 02- Verify that clicking on add shopping cart button is correct.
     def test_put_in_shopping_cart(self):
-        self.login()
+        self.login(custo_addr, custo_pwd)
         driver = self.driver
         driver.get(TARGET)
         driver.execute_script("arguments[0].click();", driver.find_elements_by_xpath('//*[@id="category-wrap"]/div/a[1]/div/i')[0])
@@ -84,8 +98,9 @@ class UiTest(unittest.TestCase):
         sleep(3)
         assert "沒有庫存了".encode('utf-8').decode('utf-8') in driver.find_elements_by_xpath('//*[@id="toast-container"]/div[contains(@class, "toast-error")]')[0].text    
 
+    # TC 03- Verify that clicking on clear button must to clear shopping cart.
     def test_clear_shopping_cart(self):
-        self.login()
+        self.login(custo_addr, custo_pwd)
         driver = self.driver
         driver.get(TARGET+'/products/item/63')
         driver.execute_script("arguments[0].click();", driver.find_elements_by_xpath('/html/body/main/div/div/div[1]/div[2]/div/div[3]/button')[0])
@@ -104,6 +119,49 @@ class UiTest(unittest.TestCase):
         expect_column_count = 1
         actual_column_count = len(driver.find_elements_by_xpath("/html/body/main/div/div/div/div/div[2]/form/div[1]/div/table/tbody/tr/td"))
         self.assertEqual(actual_column_count, expect_column_count)
+
+    # TC 04- Verify that modifying the number of product.
+    def test_modify_number_of_product(self):
+        self.login(custo_addr, custo_pwd)
+        driver = self.driver
+        driver.get(TARGET+'')
+        driver.get(TARGET+'/products/item/63')
+        driver.execute_script("arguments[0].click();", driver.find_elements_by_xpath('/html/body/main/div/div/div[1]/div[2]/div/div[3]/button')[0])
+        
+        driver.get(TARGET+'/shopping-cart')
+        # get number of product before modify
+        origin_number = driver.find_element_by_xpath('/html/body/main/div/div/div/div/div[2]/form/div[1]/div/table/tbody/tr/td[3]').text
+        self.assertEqual("1", origin_number)
+        # click modify
+        driver.execute_script("arguments[0].click();", driver.find_elements_by_xpath('/html/body/main/div/div/div/div/div[2]/form/div[1]/div/table/tbody/tr/td[5]/button[1]')[0])
+        sleep(1)
+        # type new number
+        new_number = 5
+        alert_obj = driver.switch_to.alert
+        alert_obj.send_keys(str(new_number))
+        alert_obj.accept()
+        # wait for update
+        sleep(3)
+        # get number of product before modify
+        after_modift_number = driver.find_element_by_xpath('/html/body/main/div/div/div/div/div[2]/form/div[1]/div/table/tbody/tr/td[3]').text
+        self.assertEqual(str(new_number), after_modift_number)        
+    
+    # TC 05- Verify that buying a product successfully.
+    def test_buy_product(self):
+        pass
+
+    # TC 06- Verify that discount state is correct.
+    def test_discount_code(self):
+        pass
+
+    # TC 07- Verify that updating the email. 
+    def test_update_email(self):
+        pass
+
+    # TC 08- Verify that adding a new customer address.
+    def test_add_address(self):
+        pass
+
 
 def main():
     unittest.main()
