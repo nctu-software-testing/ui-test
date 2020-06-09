@@ -25,7 +25,7 @@ class UiTest(unittest.TestCase):
         options = Options()
         options.add_argument('--start-maximized')
         options.add_argument("--window-size=1920,1080")
-        # options.add_argument('--headless')
+        options.add_argument('--headless')
         options.add_argument('--disable-gpu')
         options.add_argument('--no-sandbox')
         # options.binary_location = CHROME_BINARY_LOCATION
@@ -144,11 +144,31 @@ class UiTest(unittest.TestCase):
         sleep(3)
         # get number of product before modify
         after_modift_number = driver.find_element_by_xpath('/html/body/main/div/div/div/div/div[2]/form/div[1]/div/table/tbody/tr/td[3]').text
-        self.assertEqual(str(new_number), after_modift_number)        
+        self.assertEqual(after_modift_number, str(new_number))        
     
     # TC 05- Verify that buying a product successfully.
     def test_buy_product(self):
-        pass
+        self.login(custo_addr, custo_pwd)
+        driver = self.driver
+        driver.get(TARGET+'')
+        driver.get(TARGET+'/products/item/63')
+        driver.execute_script("arguments[0].click();", driver.find_elements_by_xpath('/html/body/main/div/div/div[1]/div[2]/div/div[3]/button')[0])
+        
+        driver.get(TARGET+'/shopping-cart')
+        # click go to order info
+        driver.execute_script("arguments[0].click();", driver.find_elements_by_xpath('//*[@id="checkout_info"]/div[2]/button')[0])
+        product_name = driver.find_element_by_xpath('/html/body/main/div/div/form/div[1]/div[1]/table/tbody/tr[1]/td[1]/a').text
+        number_of_product = int(driver.find_element_by_xpath('/html/body/main/div/div/form/div[1]/div[1]/table/tbody/tr[1]/td[3]').text)
+        # click place the order
+        driver.execute_script("arguments[0].click();", driver.find_elements_by_xpath('/html/body/main/div/div/form/div[1]/div[2]/button')[0])
+        # go to check order
+        driver.get(TARGET+'/order')
+        # click first order
+        driver.execute_script("arguments[0].click();", driver.find_elements_by_xpath('/html/body/main/div/div/div[2]/div/div/table/tbody/tr[1]/td[1]/a')[0])
+        product_name_order = driver.find_element_by_xpath('/html/body/main/div/div/div[2]/div/div/table/tbody/tr/td[2]/a').text
+        number_of_product_order = int(driver.find_element_by_xpath('/html/body/main/div/div/div[2]/div/div/table/tbody/tr/td[4]').text)
+        self.assertEqual(product_name_order, product_name)
+        self.assertEqual(number_of_product_order, number_of_product)
 
     # TC 06- Verify that discount state is correct.
     def test_discount_code(self):
