@@ -5,3 +5,4 @@ chromedriver.exe
 venv
 .main.py.swo
 tt.py
+__pycache__/
