@@ -224,7 +224,7 @@ class UiTest(unittest.TestCase):
         email = "asdf@gzxcv.qwer"
         driver.find_element_by_xpath('//*[@id="emailInput"]').send_keys(email)
         # click confirm ## xpath of this button may change!
-        driver.execute_script("arguments[0].click();", driver.find_elements_by_xpath('/html/body/div[7]/div/div/div[2]/form/div[2]/button')[0])
+        driver.execute_script("arguments[0].click();", driver.find_elements_by_xpath('/html/body/div[10]/div/div/div[2]/form/div[2]/button')[0])
         
         # get new profile email
         profile_email = (driver.find_element_by_xpath('/html/body/main/div/div/div[2]/div/div/div/div/ul/li[5]/span[2]').text).split(' ')[0]
